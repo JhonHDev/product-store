@@ -1,8 +1,14 @@
+import AppRouter from './router';
+
+import { Provider } from 'react-redux';
+
+import store from './shared/store';
+
 const App = () => {
 	return (
-		<div className="text-center my-10">
-			<h1 className="text-2xl">Product Store</h1>
-		</div>
+		<Provider store={store}>
+			<AppRouter />
+		</Provider>
 	);
 };
 
