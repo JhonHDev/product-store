@@ -1,9 +1,12 @@
 import { Navigate, Outlet } from 'react-router-dom';
 
-const PublicRoutes = () => {
-	const authUser = true;
+import AuthUser from '../app/Auth/models/AuthUser';
 
-	return authUser ? <Outlet /> : <Navigate to='/auth/' />;
+interface Params {
+	user: AuthUser | null;
+}
+
+const PublicRoutes = ({ user }: Params) => {
+	return user ? <Navigate to='/products' /> : <Outlet />;
 };
-
 export default PublicRoutes;

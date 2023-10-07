@@ -1,7 +1,14 @@
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useDispatch } from 'react-redux';
+
+import { createNewAccount } from '../../services';
+import { addUser } from '../../authSlice';
 
 import AuthFormTitle from '../../components/AuthFormTitle';
 import AuthOptions from '../../components/AuthOptions';
+import AuthLoader from '../../components/AuthLoader';
+import { useNavigate } from 'react-router-dom';
 
 type FormFiels = {
 	name: string;
@@ -15,11 +22,37 @@ const SignUp = () => {
 		handleSubmit,
 		getValues,
 		formState: { errors },
+		reset,
 	} = useForm<FormFiels>();
 
-	const onSubmit = () => {
+	const dispatch = useDispatch();
+	const navigate = useNavigate();
+
+	const [isLoading, setIsLoading] = useState(false);
+
+	const onSubmit = async () => {
 		const { name, email, password } = getValues();
-		console.log({ name, email, password });
+		setIsLoading(true);
+
+		try {
+			const user = await createNewAccount({ name, email, password });
+
+			dispatch(
+				addUser({
+					userId: user.uid,
+					name: user.displayName,
+					email: user.email,
+					photo: user.photoURL,
+				})
+			);
+
+			reset();
+			navigate('/products');
+		} catch (error) {
+			console.log(error);
+		} finally {
+			setIsLoading(false);
+		}
 	};
 
 	return (
@@ -99,10 +132,14 @@ const SignUp = () => {
 				)}
 
 				<button
-					className='bg-malachite hover:bg-malachite/90 text-white py-3 rounded-md'
+					disabled={isLoading}
+					className={` text-white py-3 rounded-md flex justify-center items-center ${
+						isLoading ? 'bg-malachite/60' : 'bg-malachite hover:bg-malachite/90'
+					}`}
 					type='submit'
 				>
-					Crear cuenta
+					{isLoading && <AuthLoader />}
+					{!isLoading && <span>Crear cuenta</span>}
 				</button>
 			</form>
 

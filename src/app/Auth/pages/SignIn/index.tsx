@@ -1,8 +1,14 @@
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { useForm } from 'react-hook-form';
+import { Link, useNavigate } from 'react-router-dom';
+
+import { loginWithEmailAndPassword } from '../../services';
+import { addUser } from '../../authSlice';
 
 import AuthFormTitle from '../../components/AuthFormTitle';
 import AuthOptions from '../../components/AuthOptions';
+import AuthLoader from '../../components/AuthLoader';
 
 type FormFiels = {
 	email: string;
@@ -15,11 +21,37 @@ const SignIn = () => {
 		handleSubmit,
 		getValues,
 		formState: { errors },
+		reset,
 	} = useForm<FormFiels>();
 
-	const onSubmit = () => {
+	const dispatch = useDispatch();
+	const navigate = useNavigate();
+
+	const [isLoading, setIsLoading] = useState(false);
+
+	const onSubmit = async () => {
 		const { email, password } = getValues();
-		console.log({ email, password });
+		setIsLoading(true);
+
+		try {
+			const user = await loginWithEmailAndPassword({ email, password });
+
+			dispatch(
+				addUser({
+					userId: user.uid,
+					name: user.displayName,
+					email: user.email,
+					photo: user.photoURL,
+				})
+			);
+
+			reset();
+			navigate('/products');
+		} catch (error) {
+			console.log(error);
+		} finally {
+			setIsLoading(false);
+		}
 	};
 
 	return (
@@ -76,10 +108,14 @@ const SignIn = () => {
 				)}
 
 				<button
-					className='bg-malachite hover:bg-malachite/90 text-white py-3 rounded-md'
+					disabled={isLoading}
+					className={` text-white py-3 rounded-md flex justify-center items-center ${
+						isLoading ? 'bg-malachite/60' : 'bg-malachite hover:bg-malachite/90'
+					}`}
 					type='submit'
 				>
-					Ingresar
+					{isLoading && <AuthLoader />}
+					{!isLoading && <span>Ingresar</span>}
 				</button>
 			</form>
 

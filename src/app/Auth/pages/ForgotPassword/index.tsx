@@ -1,7 +1,11 @@
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+
+import { sendMessageToResetPassword } from '../../services';
 
 import AuthFormTitle from '../../components/AuthFormTitle';
 import AuthBtnBack from '../../components/AuthBtnBack';
+import AuthLoader from '../../components/AuthLoader';
 
 type FormFiels = {
 	email: string;
@@ -13,11 +17,23 @@ const ForgotPassword = () => {
 		handleSubmit,
 		getValues,
 		formState: { errors },
+		reset,
 	} = useForm<FormFiels>();
 
-	const onSubmit = () => {
+	const [isLoading, setIsLoading] = useState(false);
+
+	const onSubmit = async () => {
 		const { email } = getValues();
-		console.log({ email });
+		setIsLoading(true);
+
+		try {
+			await sendMessageToResetPassword(email);
+			reset();
+		} catch (error) {
+			console.log(error);
+		} finally {
+			setIsLoading(false);
+		}
 	};
 
 	return (
@@ -52,10 +68,14 @@ const ForgotPassword = () => {
 				{errors.email && <span className='text-red-500 -mt-2'>{errors.email.message}</span>}
 
 				<button
-					className='bg-malachite hover:bg-malachite/90 text-white py-3 rounded-md'
+					disabled={isLoading}
+					className={` text-white py-3 rounded-md flex justify-center items-center ${
+						isLoading ? 'bg-malachite/60' : 'bg-malachite hover:bg-malachite/90'
+					}`}
 					type='submit'
 				>
-					Cambiar contraseña
+					{isLoading && <AuthLoader />}
+					{!isLoading && <span> Cambiar contraseña</span>}
 				</button>
 
 				<AuthBtnBack route='/auth/sign-in' />

@@ -3,12 +3,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import AuthState from './models/AuthState';
 
 const initialState: AuthState = {
-	user: {
-		userId: null,
-		name: null,
-		email: null,
-		photo: null,
-	},
+	user: null,
 };
 
 const authSlice = createSlice({
@@ -23,5 +18,7 @@ const authSlice = createSlice({
 		},
 	},
 });
+
+export const { addUser, removeUser } = authSlice.actions;
 
 export default authSlice;

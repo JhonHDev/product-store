@@ -1,9 +1,13 @@
 import { Navigate, Outlet } from 'react-router-dom';
 
-const PrivateRoutes = () => {
-	const authUser = false;
+import AuthUser from '../app/Auth/models/AuthUser';
 
-	return authUser ? <Navigate to='/' /> : <Outlet />;
+interface Params {
+	user: AuthUser | null;
+}
+
+const PrivateRoutes = ({ user }: Params) => {
+	return user ? <Outlet /> : <Navigate to='/auth/sign-in' />;
 };
 
 export default PrivateRoutes;
